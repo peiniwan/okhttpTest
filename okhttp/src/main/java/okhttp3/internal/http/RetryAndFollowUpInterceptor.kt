@@ -64,7 +64,7 @@ class RetryAndFollowUpInterceptor(private val client: OkHttpClient) : Intercepto
         var recoveredFailures = listOf<IOException>()
         //重试、301了去另一个地址，while（true）既不出错也没有重定向就返回
         while (true) {
-            call.enterNetworkInterceptorExchange(request, newExchangeFinder) //链接准备，设置寻找连接需要的数据，通过newExchangeFinder复用的
+            call.enterNetworkInterceptorExchange(request, newExchangeFinder) //链接准备，设置寻找连接需要的数据，newExchangeFinder,是否创建
 
             var response: Response
             var closeActiveExchange = true
@@ -74,7 +74,7 @@ class RetryAndFollowUpInterceptor(private val client: OkHttpClient) : Intercepto
                 }
 
                 try {
-                    response = realChain.proceed(request) //请求，交给bridge拦截器去处理
+                    response = realChain.proceed(request)
                     newExchangeFinder = true
                 } catch (e: RouteException) {//路由出错
                     // The attempt to connect via a route failed. The request will not have been sent.
@@ -92,7 +92,7 @@ class RetryAndFollowUpInterceptor(private val client: OkHttpClient) : Intercepto
                     } else {
                         recoveredFailures += e
                     }
-                    newExchangeFinder = false//设为false，不重连了
+                    newExchangeFinder = false
                     continue
                 }
 
@@ -106,10 +106,10 @@ class RetryAndFollowUpInterceptor(private val client: OkHttpClient) : Intercepto
                 }
 
                 val exchange = call.interceptorScopedExchange
-                //是不是重定向，followUpRequest方法的主要作用就是为新的重试Request添加验证头等内容
+                //是不是重定向
                 val followUp = followUpRequest(response, exchange)
 
-                // 重定向处理
+                // 进行重定向处理，不需要重定向
                 if (followUp == null) {
                     if (exchange != null && exchange.isDuplex) {
                         call.timeoutEarlyExit()

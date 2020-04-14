@@ -242,7 +242,7 @@ class RealCall(
       check(exchange == null)
     }
 
-    val codec = exchangeFinder!!.find(client, chain)//coder and DECODER 编解码格式，HTTP1请求返回HTTP1的codec，并且是一个健康的连接，都返回了
+    val codec = exchangeFinder!!.find(client, chain)//找到一个健康的连接，返回编码器
     val result = Exchange(this, eventListener, exchangeFinder!!, codec)//codec装进去Exchange
     this.interceptorScopedExchange = result
 

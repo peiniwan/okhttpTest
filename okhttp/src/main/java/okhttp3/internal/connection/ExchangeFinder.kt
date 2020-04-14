@@ -114,7 +114,7 @@ class ExchangeFinder(
       )
 
       // Confirm that the connection is good.
-      if (candidate.isHealthy(doExtensiveHealthChecks)) {//如果是健康的就返回
+      if (candidate.isHealthy(doExtensiveHealthChecks)) {
         return candidate
       }
 
@@ -166,7 +166,7 @@ class ExchangeFinder(
         null
       }
 
-      if (call.connection != null) {//不=null，说明可以用，继续下面，直接返回了。没有才从池里拿，201返回
+      if (call.connection != null) {//不=null，说明可以用，继续下面，直接返回了。没有才从池里拿
         // We had an already-allocated connection and it's good.
         result = call.connection
         releasedConnection = null
@@ -181,7 +181,7 @@ class ExchangeFinder(
         // Attempt to get a connection from the pool.  尝试拿放在池里的连接
         if (connectionPool.callAcquirePooledConnection(address, call, null, false)) {
           foundPooledConnection = true
-          result = call.connection  //拿到了就去连接
+          result = call.connection  //拿到了就可以去连接了
         } else if (nextRouteToTry != null) {
           selectedRoute = nextRouteToTry
           nextRouteToTry = null

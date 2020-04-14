@@ -276,10 +276,10 @@ class RealConnection(//真正的请求
       else -> Socket(proxy)
     }
     this.rawSocket = rawSocket
-    //把连接建立起来，下面就是Java底层了
     eventListener.connectStart(call, route.socketAddress, proxy)
     rawSocket.soTimeout = readTimeout
     try {
+      //把连接建立起来，下面就是Java底层了
       Platform.get().connectSocket(rawSocket, route.socketAddress, connectTimeout)
     } catch (e: ConnectException) {
       throw ConnectException("Failed to connect to ${route.socketAddress}").apply {
@@ -353,8 +353,8 @@ class RealConnection(//真正的请求
     var success = false
     var sslSocket: SSLSocket? = null
     try {
-      // Create the wrapper over the connected socket.
-      sslSocket = sslSocketFactory!!.createSocket(//创建
+      // Create the wrapper over the connected socket. 基于之前创建的原生Socket 建立一个SSLSocket
+      sslSocket = sslSocketFactory!!.createSocket(
           rawSocket, address.url.host, address.url.port, true /* autoClose */) as SSLSocket
 
       // Configure the socket's ciphers, TLS versions, and extensions.
@@ -364,7 +364,7 @@ class RealConnection(//真正的请求
       }
 
       // Force handshake. This can throw!
-      sslSocket.startHandshake()
+      sslSocket.startHandshake()  //开始握手
       // block for session establishment
       val sslSocketSession = sslSocket.session
       val unverifiedHandshake = sslSocketSession.handshake()
@@ -405,7 +405,7 @@ class RealConnection(//真正的请求
       } else {
         null
       }
-      socket = sslSocket//这是ssl的socket，如果没有还是HTTP
+      socket = sslSocket// 握手成功，获取source和sink流
       source = sslSocket.source().buffer()
       sink = sslSocket.sink().buffer()
       protocol = if (maybeProtocol != null) Protocol.get(maybeProtocol) else Protocol.HTTP_1_1

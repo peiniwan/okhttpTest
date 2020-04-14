@@ -29,7 +29,8 @@ object ConnectInterceptor : Interceptor {
   @Throws(IOException::class)
   override fun intercept(chain: Interceptor.Chain): Response {
     val realChain = chain as RealInterceptorChain
-    val exchange = realChain.call.initExchange(chain)//Exchange数据交换，真正去建立连接
+    val exchange = realChain.call.initExchange(chain)//真正去建立连接
+    // Exchange数据交换(结果封装起来)，负责HTTP连接的维护管理及通知ExchangeCodec编码器进行实际的I/O操作
     val connectedChain = realChain.copy(exchange = exchange)
     return connectedChain.proceed(realChain.request)//直接进行最后一个，不需要后置任务了
   }

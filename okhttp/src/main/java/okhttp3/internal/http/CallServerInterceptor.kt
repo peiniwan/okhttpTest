@@ -24,7 +24,7 @@ import okio.buffer
 
 /** This is the last interceptor in the chain. It makes a network call to the server. */
 class CallServerInterceptor(private val forWebSocket: Boolean) : Interceptor {
-  //读数据，进行iO操作了，返回给ConnectInterceptor，再返回给
+  //读数据，进行iO操作了，返回给ConnectInterceptor
   @Throws(IOException::class)
   override fun intercept(chain: Interceptor.Chain): Response {
     val realChain = chain as RealInterceptorChain
@@ -73,7 +73,7 @@ class CallServerInterceptor(private val forWebSocket: Boolean) : Interceptor {
     }
 
     if (requestBody == null || !requestBody.isDuplex()) {
-      exchange.finishRequest()
+      exchange.finishRequest()//完成响应
     }
     if (responseBuilder == null) {
       responseBuilder = exchange.readResponseHeaders(expectContinue = false)!!//读响应头
@@ -105,7 +105,7 @@ class CallServerInterceptor(private val forWebSocket: Boolean) : Interceptor {
       code = response.code
     }
 
-    exchange.responseHeadersEnd(response)
+    exchange.responseHeadersEnd(response)  // 读取响应头结束
 
     response = if (forWebSocket && code == 101) {
       // Connection is upgrading, but we need to ensure interceptors see a non-null response body.
@@ -113,7 +113,7 @@ class CallServerInterceptor(private val forWebSocket: Boolean) : Interceptor {
           .body(EMPTY_RESPONSE)
           .build()
     } else {
-      response.newBuilder()
+      response.newBuilder()  //创建响应体
           .body(exchange.openResponseBody(response))
           .build()
     }

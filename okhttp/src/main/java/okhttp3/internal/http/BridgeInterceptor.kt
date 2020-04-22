@@ -35,7 +35,7 @@ class BridgeInterceptor(private val cookieJar: CookieJar) : Interceptor {
 
   @Throws(IOException::class)
   override fun intercept(chain: Interceptor.Chain): Response {
-    //前置添加头
+    //添加头
     val userRequest = chain.request()
     val requestBuilder = userRequest.newBuilder()
 
@@ -81,23 +81,23 @@ class BridgeInterceptor(private val cookieJar: CookieJar) : Interceptor {
       requestBuilder.header("User-Agent", userAgent)
     }
 
-    val networkResponse = chain.proceed(requestBuilder.build()) //交给下一个出来
+    val networkResponse = chain.proceed(requestBuilder.build())
 
     cookieJar.receiveHeaders(userRequest.url, networkResponse.headers)
 
     val responseBuilder = networkResponse.newBuilder()
-        .request(userRequest)
+            .request(userRequest)
 
     if (transparentGzip &&
-        "gzip".equals(networkResponse.header("Content-Encoding"), ignoreCase = true) &&
-        networkResponse.promisesBody()) {//自己解开
+            "gzip".equals(networkResponse.header("Content-Encoding"), ignoreCase = true) &&
+            networkResponse.promisesBody()) {//自己解开
       val responseBody = networkResponse.body
       if (responseBody != null) {
         val gzipSource = GzipSource(responseBody.source())
         val strippedHeaders = networkResponse.headers.newBuilder()
-            .removeAll("Content-Encoding")
-            .removeAll("Content-Length")
-            .build()
+                .removeAll("Content-Encoding")
+                .removeAll("Content-Length")
+                .build()
         responseBuilder.headers(strippedHeaders)
         val contentType = networkResponse.header("Content-Type")
         responseBuilder.body(RealResponseBody(contentType, -1L, gzipSource.buffer()))

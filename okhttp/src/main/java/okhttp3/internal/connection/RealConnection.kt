@@ -185,7 +185,7 @@ class RealConnection(//真正的请求
 
     while (true) {
       try {
-        if (route.requiresTunnel()) {//代理是HTTP（转HTTPS），但是目标是HTTPs的话
+        if (route.requiresTunnel()) {//代理是HTTP，转HTTPS，目标是HTTPs的话
           connectTunnel(connectTimeout, readTimeout, writeTimeout, call, eventListener)
           if (rawSocket == null) {
             // We were unable to connect the tunnel but properly closed down our resources.
@@ -193,8 +193,8 @@ class RealConnection(//真正的请求
           }
         } else {
           connectSocket(connectTimeout, readTimeout, call, eventListener)//直接tcp连接
-        }
-        establishProtocol(connectionSpecSelector, pingIntervalMillis, call, eventListener)//tcp好了，就创建HTTPS或者HTTP2
+        }//tcp好了，就创建HTTPS或者HTTP2
+        establishProtocol(connectionSpecSelector, pingIntervalMillis, call, eventListener)
         eventListener.connectEnd(call, route.socketAddress, route.proxy, protocol)
         break
       } catch (e: IOException) {

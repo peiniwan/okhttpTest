@@ -166,13 +166,13 @@ class ExchangeFinder(
         null
       }
 
-      if (call.connection != null) {//不=null，说明可以用，继续下面，直接返回了。没有才从池里拿
+      if (call.connection != null) {//不=null，说明可以用，然后继续，下面直接返回了
         // We had an already-allocated connection and it's good.
         result = call.connection
         releasedConnection = null
       }
 
-      if (result == null) {
+      if (result == null) {//没有从池里拿
         // The connection hasn't had any problems for this call.
         refusedStreamCount = 0
         connectionShutdownCount = 0
@@ -196,13 +196,13 @@ class ExchangeFinder(
     if (foundPooledConnection) {
       eventListener.connectionAcquired(call, result!!)
     }
-    if (result != null) {
+    if (result != null) {//如果有，把可用连接返回
       // If we found an already-allocated or pooled connection, we're done.
-      return result!!  //把结果返回
+      return result!!
     }
 
     // If we need a route selection, make one. This is a blocking operation. 拿不到就再拿一次
-    var newRouteSelection = false
+    var newRouteSelection = false //一个域名可以配置多个IP
     if (selectedRoute == null && (routeSelection == null || !routeSelection!!.hasNext())) {
       var localRouteSelector = routeSelector
       if (localRouteSelector == null) {

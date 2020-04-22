@@ -56,7 +56,7 @@ class CacheInterceptor(internal val cache: Cache?) : Interceptor {
       // The cache candidate wasn't applicable. Close it.
       cacheCandidate.body?.closeQuietly()
     }
-//前置判断有没有缓存，没有网络请求也没有缓存就失败了
+//判断有没有缓存，没有网络请求也没有缓存就失败了
     // If we're forbidden from using the network and the cache is insufficient, fail.
     if (networkRequest == null && cacheResponse == null) {
       return Response.Builder()

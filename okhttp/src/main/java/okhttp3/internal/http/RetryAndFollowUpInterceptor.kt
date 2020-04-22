@@ -87,6 +87,7 @@ class RetryAndFollowUpInterceptor(private val client: OkHttpClient) : Intercepto
                     continue //这都是请求失败了，失败了就继续下一次
                 } catch (e: IOException) {
                     // An attempt to communicate with a server failed. The request may have been sent.
+                    // 返回下面，结束
                     if (!recover(e, call, request, requestSendStarted = e !is ConnectionShutdownException)) {
                         throw e.withSuppressed(recoveredFailures)
                     } else {
@@ -97,7 +98,7 @@ class RetryAndFollowUpInterceptor(private val client: OkHttpClient) : Intercepto
                 }
 
                 // Attach the prior response if it exists. Such responses never have a body.
-                if (priorResponse != null) {//前一个重试得到的Response，就用前一个
+                if (priorResponse != null) {//前一个重试得到的Response，就用前一个的response
                     response = response.newBuilder()
                             .priorResponse(priorResponse.newBuilder()
                                     .body(null)
@@ -106,10 +107,10 @@ class RetryAndFollowUpInterceptor(private val client: OkHttpClient) : Intercepto
                 }
 
                 val exchange = call.interceptorScopedExchange
-                //是不是重定向
+                //进行重定向处理，是不是重定向，因为有可能不是返回200
                 val followUp = followUpRequest(response, exchange)
 
-                // 进行重定向处理，不需要重定向
+                // 不需要重定向
                 if (followUp == null) {
                     if (exchange != null && exchange.isDuplex) {
                         call.timeoutEarlyExit()
@@ -118,7 +119,7 @@ class RetryAndFollowUpInterceptor(private val client: OkHttpClient) : Intercepto
                     //成功就返回
                     return response
                 }
-                //重定向成功也返回
+                //只进行一次，也把结果返回
                 val followUpBody = followUp.body
                 if (followUpBody != null && followUpBody.isOneShot()) {
                     closeActiveExchange = false
@@ -131,7 +132,7 @@ class RetryAndFollowUpInterceptor(private val client: OkHttpClient) : Intercepto
                     throw ProtocolException("Too many follow-up requests: $followUpCount")
                 }
 
-                request = followUp
+                request = followUp//赋值给request，进行下一轮
                 priorResponse = response
             } finally {
                 call.exitNetworkInterceptorExchange(closeActiveExchange)
